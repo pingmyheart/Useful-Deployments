@@ -1,26 +1,43 @@
 services:
   zookeeper-1:
+    container_name: zookeeper-1
     image: confluentinc/cp-zookeeper:7.4.4
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "22181:2181"
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   zookeeper-2:
+    container_name: zookeeper-2
     image: confluentinc/cp-zookeeper:7.4.4
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "32181:2181"
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   kafka-1:
+    container_name: kafka-1
     image: confluentinc/cp-kafka:7.4.4
+    restart: always
     depends_on:
       - zookeeper-1
       - zookeeper-2
-
     ports:
       - "29092:29092"
     environment:
@@ -30,8 +47,17 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:29092" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
   kafka-2:
+    container_name: kafka-2
     image: confluentinc/cp-kafka:7.4.4
+    restart: always
     depends_on:
       - zookeeper-1
       - zookeeper-2
@@ -44,3 +70,9 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:39092" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s

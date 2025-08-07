@@ -1,0 +1,13 @@
+services:
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:2.0.22
+    restart: always
+    ports:
+      - "1883:1883"
+    healthcheck:
+      test: [ "CMD", "timeout", "1", "mosquitto_sub", "-h", "localhost", "-p", "1883", "-t", "topic", "-E", "-i", "probe" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s

@@ -1,0 +1,15 @@
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:11.8.2
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: P@ssw0rd
+    volumes:
+      - ./volume:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
